@@ -5,15 +5,12 @@ use strict;
 use Net::Twitter;
 use Scalar::Util 'blessed';
 
-# When no authentication is required:
-my $nt = Net::Twitter->new(legacy => 0);
-
 my %config = do '/secret/twitter.config';
 
-my $consumer_key	=$config{consumer_key};
-my $consumer_secret	=$config{consumer_secret};
-my $token			=$config{token};
-my $token_secret	=$config{token_secret};
+my $consumer_key		= $config{consumer_key};
+my $consumer_secret		= $config{consumer_secret};
+my $token			= $config{token};
+my $token_secret		= $config{token_secret};
 
 
 # As of 13-Aug-2010, Twitter requires OAuth for authenticated requests
@@ -26,6 +23,8 @@ my $nt = Net::Twitter->new(
 );
 
 my $result = $nt->update('Hello, world!');
+
+my $high_water=100;
 
 eval {
     my $statuses = $nt->friends_timeline({ since_id => $high_water, count => 100 });
