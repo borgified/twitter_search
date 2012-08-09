@@ -1,1 +1,3 @@
 =head1 available_usernames.pl
+
+Answers questions like: are there any three letter twitter user handles left?
