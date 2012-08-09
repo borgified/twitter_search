@@ -1,23 +1,16 @@
 #!/usr/bin/perl 
 use strict;
 use warnings;
-
+use Algorithm::Combinatorics qw(:all);
 my @alphabet=("a".."z");
 my @number=("0".."9");
 
 my @alphanumeric = (@alphabet,@number);
 
-my @word;
+my $length = 4;
 
-# all letters
-foreach my $item(@alphanumeric){
-	foreach  my $item2(@alphanumeric){
-		foreach  my $item3(@alphanumeric){
-			push(@word,"$item$item2$item3");
-		}
-	}
-}
-foreach my $line(@word){
-	print "$line\n";
-}
+my $iter = variations_with_repetition(\@alphanumeric,$length);
 
+while (my $p = $iter->next){
+	print @$p,"\n";
+}
