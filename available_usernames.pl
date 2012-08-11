@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Net::Twitter;
 use Scalar::Util 'blessed';
+use DBI;
 
 my %config = do '/secret/twitter.config';
 
@@ -22,20 +23,27 @@ my $nt = Net::Twitter->new(
     access_token_secret => $token_secret,
 );
 
-my $result = $nt->update('Hello, world!');
-
-my $high_water=100;
+my $arrayref;
 
 eval {
-    my $statuses = $nt->friends_timeline({ since_id => $high_water, count => 100 });
-    for my $status ( @$statuses ) {
-        print "$status->{created_at} <$status->{user}{screen_name}> $status->{text}\n";
-    }
+
+	$arrayref=$nt->lookup_users( {screen_name => 'fred,barney,wilma'});
+
 };
+
 if ( my $err = $@ ) {
     die $@ unless blessed $err && $err->isa('Net::Twitter::Error');
 
     warn "HTTP Response Code: ", $err->code, "\n",
          "HTTP Message......: ", $err->message, "\n",
          "Twitter error.....: ", $err->error, "\n";
+}
+
+foreach my $hash (@$arrayref){
+
+	foreach my $key (keys %$hash){
+		print "$key: $$hash{$key}\n";
+	}
+	print "==================\n";
+
 }
