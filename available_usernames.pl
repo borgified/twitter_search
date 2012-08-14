@@ -36,9 +36,21 @@ my $nt = Net::Twitter->new(
 
 my $arrayref;
 
+my $ar=&gen_names;
+#my $names=shift(@$ar);
+my $arg=shift(@ARGV);
+my $names=$$ar[$arg];
+
+my %results_hash;
+my @names = split(/,/,$names);
+foreach my $name (@names){
+	$results_hash{$name}="";
+}
+
 eval {
 
-	#$arrayref=$nt->lookup_users( {screen_name => 'a,blkasdfjk,c'});
+	$arrayref=$nt->lookup_users( {screen_name => $names});
+	#$arrayref=$nt->lookup_users( {screen_name => 'aaa,aa0,ccc'});
 
 };
 
@@ -50,6 +62,8 @@ if ( my $err = $@ ) {
          "Twitter error.....: ", $err->error, "\n";
 }
 
+open(OUTPUT,">>results.txt") or die $!;
+print OUTPUT "===========================\n";
 
 foreach my $hash (@$arrayref){
 
@@ -57,18 +71,39 @@ foreach my $hash (@$arrayref){
 #		print "$key: $$hash{$key}\n";
 #	}
 
-	print "$$hash{screen_name} $$hash{id} $$hash{friends_count} $$hash{followers_count} $$hash{statuses_count}\n";
+	print OUTPUT "$$hash{screen_name} $$hash{id} $$hash{friends_count} $$hash{followers_count} $$hash{statuses_count}\n";
+#	print "$$hash{screen_name} $$hash{id} $$hash{friends_count} $$hash{followers_count} $$hash{statuses_count}\n";
+
+	my $screen_name=$$hash{screen_name};
+	$screen_name=~tr/A-Z/a-z/;
+	$results_hash{$screen_name}=$$hash{id};
 
 }
 
-
-my $ar=&gen_names;
-my $x=0;
-foreach my $item (@$ar){
-	print "$item\n";
-	$x++;
-	print "$x ====================\n";
+my $count=0;
+foreach my $screen_name (sort keys %results_hash){
+	if($results_hash{$screen_name} eq ''){
+		print "$count $screen_name may be available\n";
+	}else{
+		print "$count $screen_name $results_hash{$screen_name}\n";
+	}
+	$count++;
 }
+
+print "rate limit status\n";
+my $status=$nt->rate_limit_status;
+foreach my $item (sort keys %$status){
+	print "$item $$status{$item};\n" unless($item eq 'photos');
+}
+
+### verbose output for testing gen_names
+#my $ar=&gen_names;
+#my $x=0;
+#foreach my $item (@$ar){
+#	print "$item\n";
+#	$x++;
+#	print "$x ====================\n";
+#}
 
 
 ### generate usernames
@@ -89,7 +124,8 @@ sub gen_names{
 	my $i=0;
 	my $twitter_handles="";
 	while (my $p = $iter->next){
-		$twitter_handles=$twitter_handles.join('',@$p)."($i),";
+		#$twitter_handles=$twitter_handles.join('',@$p)."($i),";
+		$twitter_handles=$twitter_handles.join('',@$p).",";
 		if($i>=99){
 			$i=0;
 			chop($twitter_handles); #remove last comma
