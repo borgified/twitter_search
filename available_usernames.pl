@@ -5,6 +5,7 @@ use strict;
 use Net::Twitter;
 use Scalar::Util 'blessed';
 use Algorithm::Combinatorics qw(:all);
+use LWP::UserAgent;
 
 my %config = do '/secret/twitter.config';
 
@@ -90,7 +91,14 @@ foreach my $hash (@$arrayref){
 my $count=0;
 foreach my $screen_name (sort keys %results_hash){
 	if($results_hash{$screen_name} eq ''){
-		print "$count $screen_name may be available\n";
+		my $result=&is_suspended($screen_name);
+		if($result==1){
+			print "$count $screen_name is suspended\n";
+		}elsif($result==0){
+			print "$count $screen_name may be available\n";
+		}else{
+			print "$count unable to check $screen_name\n";
+		}
 	}else{
 		print "$count $screen_name $results_hash{$screen_name}\n";
 	}
@@ -102,6 +110,27 @@ my $status=$nt->rate_limit_status;
 foreach my $item (sort keys %$status){
 	print "$item $$status{$item};\n" unless($item eq 'photos');
 }
+
+#check if account is suspended
+#input: $screen_name
+#output: 1=suspended, 0=available, -1=unknown
+
+sub is_suspended{
+	my $screen_name = shift @_;
+	my $ua = LWP::UserAgent->new;
+	my $res = $ua->get("http://twitter.com/$screen_name");
+	if($res->is_success){
+		my $content = $res->content;
+		if($content=~/suspended/){
+			return 1;
+		}else{
+			return 0;
+		}
+	}else{
+		return -1;
+	}
+}
+
 
 ### generate usernames
 #input: none
