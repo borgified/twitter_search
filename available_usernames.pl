@@ -64,7 +64,7 @@ if ( my $err = $@ ) {
          "HTTP Message......: ", $err->message, "\n",
          "Twitter error.....: ", $err->error, "\n";
 }
-
+<>;
 open(OUTPUT,">>results.txt") or die $!;
 print OUTPUT "===========================\n";
 
