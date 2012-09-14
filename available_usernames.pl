@@ -63,8 +63,8 @@ if ( my $err = $@ ) {
     warn "HTTP Response Code: ", $err->code, "\n",
          "HTTP Message......: ", $err->message, "\n",
          "Twitter error.....: ", $err->error, "\n";
+	exit;
 }
-<>;
 open(OUTPUT,">>results.txt") or die $!;
 print OUTPUT "===========================\n";
 
